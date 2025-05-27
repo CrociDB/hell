@@ -17,7 +17,20 @@ const BUILTIN_COMMANDS: &[BuiltinCommand] = &[
         command: "exit",
         func: builtin_exit,
     },
+    BuiltinCommand {
+        command: "type",
+        func: builtin_type,
+    }
 ];
+
+fn builtin_echo(line: Vec<&str>) {
+    if line.len() < 2 {
+        println!(" ");
+    }
+
+    let joined: String = line[1..].join(" ");
+    println!("{}", joined.trim());
+}
 
 fn builtin_exit(line: Vec<&str>) {
     if line.len() < 2 {
@@ -38,13 +51,24 @@ fn builtin_exit(line: Vec<&str>) {
     std::process::exit(value);
 }
 
-fn builtin_echo(line: Vec<&str>) {
+fn builtin_type(line: Vec<&str>) {
     if line.len() < 2 {
-        println!(" ");
+        eprintln!("Error: command `type` requirest one parameter");
+        return;
     }
 
-    let joined: String = line[1..].join(" ");
-    println!("{}", joined.trim());
+    let mut builtin_found = false;
+    for builtin in BUILTIN_COMMANDS {
+        if line[1].trim() == builtin.command {
+            println!("{} is a shell builtin", builtin.command);
+            builtin_found = true;
+            break;
+        }
+    }
+
+    if !builtin_found {
+        println!("{}: not found", line[1].trim());
+    }
 }
 
 fn check_builtins(line: Vec<&str>) -> bool {
