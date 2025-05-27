@@ -1,7 +1,25 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
 
-fn commands_exit(line: Vec<&str>) {
+// Builtins
+
+struct BuiltinCommand {
+    command: &'static str,
+    func: fn(Vec<&str>),
+}
+
+const BUILTIN_COMMANDS: &[BuiltinCommand] = &[
+    BuiltinCommand {
+        command: "echo",
+        func: builtin_echo,
+    },
+    BuiltinCommand {
+        command: "exit",
+        func: builtin_exit,
+    },
+];
+
+fn builtin_exit(line: Vec<&str>) {
     if line.len() < 2 {
         std::process::exit(1);
     }
@@ -20,24 +38,34 @@ fn commands_exit(line: Vec<&str>) {
     std::process::exit(value);
 }
 
-fn commands_echo(line: Vec<&str>) {
+fn builtin_echo(line: Vec<&str>) {
     if line.len() < 2 {
-        println!("");
+        println!(" ");
     }
 
     let joined: String = line[1..].join(" ");
     println!("{}", joined.trim());
 }
 
+fn check_builtins(line: Vec<&str>) -> bool {
+    for builtin in BUILTIN_COMMANDS {
+        let comm = line[0].trim();
+        if comm == builtin.command {
+            (builtin.func)(line);
+            return true;
+        }
+    }
+
+    false
+}
+
+// Line check
+
 fn interpret_line(input: String) {
     let cl: Vec<&str> = input.split(' ').collect();
 
-    let comm = cl[0].trim();
-    if comm == "exit" {
-        commands_exit(cl);
-    } else if comm == "echo" {
-        commands_echo(cl);
-    } else {
+    // let comm = cl[0].trim();
+    if !check_builtins(cl) {
         println!("{}: command not found", input.trim());
     }
 }
