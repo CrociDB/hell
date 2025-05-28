@@ -1,4 +1,4 @@
-use crate::defs;
+use crate::{defs, exec};
 
 struct BuiltinCommand {
     command: &'static str,
@@ -17,7 +17,7 @@ const BUILTIN_COMMANDS: &[BuiltinCommand] = &[
     BuiltinCommand {
         command: "type",
         func: builtin_type,
-    }
+    },
 ];
 
 fn builtin_echo(line: &Vec<&str>) {
@@ -54,18 +54,19 @@ fn builtin_type(line: &Vec<&str>) {
         return;
     }
 
-    let mut builtin_found = false;
+    let comm = line[1].trim();
     for builtin in BUILTIN_COMMANDS {
-        if line[1].trim() == builtin.command {
+        if comm == builtin.command {
             println!("{} is a shell builtin", builtin.command);
-            builtin_found = true;
-            break;
+            return;
         }
     }
 
-    if !builtin_found {
-        println!("{}: not found", line[1].trim());
+    if exec::check_type_exec(comm) {
+        return;
     }
+
+    println!("{}: not found", line[1].trim());
 }
 
 pub fn check_builtins(line: &Vec<&str>) -> Result<(), defs::CheckerError> {

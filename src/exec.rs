@@ -59,8 +59,12 @@ pub fn check_exec(line: &Vec<&str>) -> Result<(), defs::CheckerError> {
 
     let exec_files = get_exec_files(comm)?;
     if exec_files.len() > 0 {
-        println!("Running {}: {}", exec_files[0].filename.display(), exec_files[0].filepath.display());
-        return Ok(())
+        println!(
+            "Running {}: {}",
+            exec_files[0].filename.display(),
+            exec_files[0].filepath.display()
+        );
+        return Ok(());
     }
 
     for e in exec_files {
@@ -68,4 +72,18 @@ pub fn check_exec(line: &Vec<&str>) -> Result<(), defs::CheckerError> {
     }
 
     Err(defs::CheckerError::NotFound)
+}
+
+pub fn check_type_exec(comm: &str) -> bool {
+    match get_exec_files(comm) {
+        Ok(f) => {
+            if !f.is_empty() {
+                println!("{} is {}", f[0].filename.display(), f[0].filepath.display());
+                true
+            } else {
+                false
+            }
+        }
+        Err(_) => false,
+    }
 }
