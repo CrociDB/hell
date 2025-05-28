@@ -2,13 +2,19 @@
 use std::io::{self, Write};
 
 mod builtin;
+mod defs;
+mod exec;
 
 fn interpret_line(input: String) {
     let cl: Vec<&str> = input.split(' ').collect();
 
     // let comm = cl[0].trim();
-    if !builtin::check_builtins(cl) {
-        println!("{}: command not found", input.trim());
+    if let Err(e) = builtin::check_builtins(&cl).or_else(|_| exec::check_exec(&cl)) {
+        match e {
+            defs::CheckerError::NotFound => println!("{}: command not found", input.trim()),
+            defs::CheckerError::Io(ioe) => println!("IO Error: {}", ioe),
+            defs::CheckerError::Other(se) => println!("Error: {}", se),
+        }
     }
 }
 

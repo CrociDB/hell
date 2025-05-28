@@ -1,6 +1,8 @@
+use crate::defs;
+
 struct BuiltinCommand {
     command: &'static str,
-    func: fn(Vec<&str>),
+    func: fn(&Vec<&str>),
 }
 
 const BUILTIN_COMMANDS: &[BuiltinCommand] = &[
@@ -18,7 +20,7 @@ const BUILTIN_COMMANDS: &[BuiltinCommand] = &[
     }
 ];
 
-fn builtin_echo(line: Vec<&str>) {
+fn builtin_echo(line: &Vec<&str>) {
     if line.len() < 2 {
         println!(" ");
     }
@@ -27,7 +29,7 @@ fn builtin_echo(line: Vec<&str>) {
     println!("{}", joined.trim());
 }
 
-fn builtin_exit(line: Vec<&str>) {
+fn builtin_exit(line: &Vec<&str>) {
     if line.len() < 2 {
         std::process::exit(1);
     }
@@ -46,7 +48,7 @@ fn builtin_exit(line: Vec<&str>) {
     std::process::exit(value);
 }
 
-fn builtin_type(line: Vec<&str>) {
+fn builtin_type(line: &Vec<&str>) {
     if line.len() < 2 {
         eprintln!("Error: command `type` requirest one parameter");
         return;
@@ -66,14 +68,14 @@ fn builtin_type(line: Vec<&str>) {
     }
 }
 
-pub fn check_builtins(line: Vec<&str>) -> bool {
+pub fn check_builtins(line: &Vec<&str>) -> Result<(), defs::CheckerError> {
     for builtin in BUILTIN_COMMANDS {
         let comm = line[0].trim();
         if comm == builtin.command {
             (builtin.func)(line);
-            return true;
+            return Ok(());
         }
     }
 
-    false
+    Err(defs::CheckerError::NotFound)
 }
