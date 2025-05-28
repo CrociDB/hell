@@ -78,7 +78,7 @@ pub fn check_type_exec(comm: &str) -> bool {
     match get_exec_files(comm) {
         Ok(f) => {
             if !f.is_empty() {
-                println!("{} is {}", f[0].filename.display(), f[0].filepath.display());
+                println!("{} is {}", comm, f[0].filepath.display());
                 true
             } else {
                 false
