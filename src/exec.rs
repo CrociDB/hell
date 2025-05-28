@@ -61,7 +61,7 @@ pub fn check_exec(line: &Vec<&str>) -> Result<(), defs::CheckerError> {
     if exec_files.len() > 0 {
         println!(
             "Running {}: {}",
-            exec_files[0].filename.display(),
+            comm,
             exec_files[0].filepath.display()
         );
         return Ok(());
