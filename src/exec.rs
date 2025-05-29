@@ -23,9 +23,7 @@ fn get_exec_files(comm: &str) -> Result<Vec<ExecFile>, hell::CheckerError> {
             if file_in_path_res.is_ok() {
                 let file_in_path: Result<Vec<fs::DirEntry>, std::io::Error> = file_in_path_res
                     .unwrap()
-                    .filter_map(|entry| {
-                        let entryu = entry.as_ref().unwrap();
-                        if entryu.file_name() == comm {
+                    .filter_map(|entry| { let entryu = entry.as_ref().unwrap(); if entryu.file_name() == comm {
                             if let Ok(metadata) = entryu.metadata() {
                                 if metadata.is_file() {
                                     return Some(entry);
@@ -60,7 +58,7 @@ fn exec_program(
     exec_file: &ExecFile,
     line: &[&str],
 ) -> Result<hell::CommandHandle, hell::CheckerError> {
-    let mut command = Command::new(exec_file.filepath.to_str().unwrap());
+    let mut command = Command::new(&line[0]);
     command.args(&line[1..]);
 
     let child = command.spawn()?;
