@@ -7,7 +7,7 @@ use crate::hell::CommandHandle;
 
 #[derive(Debug)]
 struct ExecFile {
-    filename: std::ffi::OsString,
+    filename: String,
     filepath: std::path::PathBuf,
 }
 
@@ -40,7 +40,7 @@ fn get_exec_files(comm: &str) -> Result<Vec<ExecFile>, hell::CheckerError> {
                 if !files.is_empty() {
                     let f = &files[0];
                     vec.push(ExecFile {
-                        filename: f.file_name(),
+                        filename: String::from(comm),
                         filepath: f.path(),
                     });
                 }
@@ -58,7 +58,7 @@ fn exec_program(
     exec_file: &ExecFile,
     line: &[&str],
 ) -> Result<hell::CommandHandle, hell::CheckerError> {
-    let mut command = Command::new(&line[0]);
+    let mut command = Command::new(&exec_file.filename);
     command.args(&line[1..]);
 
     let child = command.spawn()?;
@@ -69,7 +69,7 @@ fn exec_program(
     })
 }
 
-pub fn check_exec(line: &Vec<&str>) -> Result<CommandHandle, hell::CheckerError> {
+pub fn check_exec(line: &[&str]) -> Result<CommandHandle, hell::CheckerError> {
     let comm = line[0].trim();
     let exec_files = get_exec_files(comm)?;
     if !exec_files.is_empty() {
