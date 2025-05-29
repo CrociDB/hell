@@ -1,7 +1,9 @@
 use std::env;
 use std::fs;
+use std::process::Command;
 
-use crate::defs;
+use crate::hell;
+use crate::hell::CommandHandle;
 
 #[derive(Debug)]
 struct ExecFile {
@@ -9,7 +11,7 @@ struct ExecFile {
     filepath: std::path::PathBuf,
 }
 
-fn get_exec_files(comm: &str) -> Result<Vec<ExecFile>, defs::CheckerError> {
+fn get_exec_files(comm: &str) -> Result<Vec<ExecFile>, hell::CheckerError> {
     let mut vec: Vec<ExecFile> = Vec::new();
 
     if let Ok(path) = env::var("PATH") {
@@ -48,30 +50,40 @@ fn get_exec_files(comm: &str) -> Result<Vec<ExecFile>, defs::CheckerError> {
         }
     } else {
         eprintln!("Error: no PATH environment variable found");
-        return Err(defs::CheckerError::Other("no PATH"));
+        return Err(hell::CheckerError::Other("no PATH"));
     }
 
     Ok(vec)
 }
 
-pub fn check_exec(line: &Vec<&str>) -> Result<(), defs::CheckerError> {
-    let comm = line[0].trim();
+fn exec_program(
+    exec_file: &ExecFile,
+    line: &[&str],
+) -> Result<hell::CommandHandle, hell::CheckerError> {
+    let mut command = Command::new(exec_file.filepath.to_str().unwrap());
+    command.args(&line[1..]);
 
+    let child = command.spawn()?;
+
+    Ok(CommandHandle {
+        child: Some(child),
+        ret: None,
+    })
+}
+
+pub fn check_exec(line: &Vec<&str>) -> Result<CommandHandle, hell::CheckerError> {
+    let comm = line[0].trim();
     let exec_files = get_exec_files(comm)?;
-    if exec_files.len() > 0 {
-        println!(
-            "Running {}: {}",
-            comm,
-            exec_files[0].filepath.display()
-        );
-        return Ok(());
+    if !exec_files.is_empty() {
+        let handle = exec_program(&exec_files[0], line)?;
+        return Ok(handle);
     }
 
     for e in exec_files {
         println!("{}", e.filepath.display());
     }
 
-    Err(defs::CheckerError::NotFound)
+    Err(hell::CheckerError::NotFound)
 }
 
 pub fn check_type_exec(comm: &str) -> bool {

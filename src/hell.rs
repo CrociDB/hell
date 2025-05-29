@@ -1,5 +1,13 @@
 use std::fmt;
+use std::process::Child;
 
+// Command
+pub struct CommandHandle {
+    pub child: Option<Child>,
+    pub ret: Option<i32>,
+}
+
+// Errors
 #[derive(Debug)]
 pub enum CheckerError {
     Io(std::io::Error),

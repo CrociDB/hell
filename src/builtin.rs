@@ -1,4 +1,4 @@
-use crate::{defs, exec};
+use crate::{exec, hell};
 
 struct BuiltinCommand {
     command: &'static str,
@@ -69,14 +69,17 @@ fn builtin_type(line: &Vec<&str>) {
     println!("{}: not found", line[1].trim());
 }
 
-pub fn check_builtins(line: &Vec<&str>) -> Result<(), defs::CheckerError> {
+pub fn check_builtins(line: &Vec<&str>) -> Result<hell::CommandHandle, hell::CheckerError> {
     for builtin in BUILTIN_COMMANDS {
         let comm = line[0].trim();
         if comm == builtin.command {
             (builtin.func)(line);
-            return Ok(());
+            return Ok(hell::CommandHandle {
+                child: None,
+                ret: Some(0),
+            });
         }
     }
 
-    Err(defs::CheckerError::NotFound)
+    Err(hell::CheckerError::NotFound)
 }
